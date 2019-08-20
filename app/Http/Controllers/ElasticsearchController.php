@@ -14,7 +14,7 @@ class ElasticsearchController extends Controller
      * @var Elasticsearch\ClientBuilder
      */
     protected $elasticSearchClient;
-    protected $hosts = ['localhost:9201'];
+    protected $hosts = ['localhost:9200'];
 
     /**
      * Let's construct our ClientBuilder beforehand so that we can easily call it in the future.
