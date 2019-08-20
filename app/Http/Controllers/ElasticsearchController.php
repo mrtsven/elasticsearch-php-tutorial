@@ -211,4 +211,99 @@ class ElasticsearchController extends Controller
 
         return $this->elasticSearchClient->delete($params);
     }
+
+    /**
+     * A simple match query on a certain field.
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function matchQuery(Request $request, string $terms)
+    {
+        // Define index/indices before hand
+        $params['index'] = ['custom-users'];
+
+        $params['type'] = '_doc';
+
+        $params['body'] = [
+            'query' => [
+                'match' => [
+                    'email' => $terms
+                ]
+            ]
+        ];
+
+        return $this->elasticSearchClient->search($params);
+    }
+
+    /**
+     * A simple match query on a certain field which we then throw into our buildResult() function to return our results.
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function matchQueryOnlyResults(Request $request, string $terms)
+    {
+        // Define index/indices before hand
+        $params['index'] = ['custom-users'];
+
+        $params['type'] = '_doc';
+
+        $params['body'] = [
+            'query' => [
+                'match' => [
+                    'email' => $terms
+                ]
+            ]
+        ];
+
+        return $this->buildResult($this->elasticSearchClient->search($params));
+    }
+
+    /**
+     * A boolean type query. Here you can constraint your query for more accurate results.
+     *
+     * @param string $terms
+     * @return array
+     */
+    public function boolQuery(Request $request, string $terms)
+    {
+        $params['index'] = ['custom-users'];
+
+        $params['type'] = '_doc';
+
+        $params['body'] = [
+            'query' => [
+                'bool' => [ // Boolean query
+                    'must' => [ // Must match the exact terms. If nothing is found it will return array with no hits.
+                        'match' => [
+                            'email' => $terms
+                        ],
+                        'match' => [
+                            'organization_id' => 1 // As we do not have this field, we will get an empty array in hits.
+                        ]
+                    ],
+                    'should' => [ // Term should appear on given field, but not required.
+                        'match' => [
+                            'name' => 'Hans'
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        return $this->elasticSearchClient->search($params);
+    }
+
+    /**
+     * Returns an array of documents.
+     * If no documents are found, it will just return an empty array.
+     *
+     * @param array $results
+     * @return array
+     */
+    private function buildResult(array $results)
+    {
+        return $results['hits']['hits'];
+    }
 }
