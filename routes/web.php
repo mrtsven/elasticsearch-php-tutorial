@@ -14,3 +14,9 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Chapter Index
+Route::get('index', 'ElasticsearchController@index');
+Route::get('get-index', 'ElasticsearchController@getIndex');
+Route::get('delete-index', 'ElasticsearchController@deleteIndex');
+Route::get('update-index', 'ElasticsearchController@updateMappings');
