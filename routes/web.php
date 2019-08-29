@@ -32,3 +32,6 @@ Route::get('delete-document', 'ElasticsearchController@deleteDocument');
 Route::get('find/{terms}', 'ElasticsearchController@matchQuery');
 Route::get('find/{terms}/result', 'ElasticsearchController@matchQueryOnlyResults');
 Route::get('find-bool/{terms}', 'ElasticsearchController@boolQuery');
+
+// Chapter Analyzers
+Route::get('/analyze', 'ElasticsearchController@stopAnalyzer');

@@ -306,4 +306,62 @@ class ElasticsearchController extends Controller
     {
         return $results['hits']['hits'];
     }
+
+    /**
+     * An example of how to use an analyzer
+     *
+     * @return array
+     */
+    public function stopAnalyzer()
+    {
+        // Let's create quickly a new index for testing purposes.
+        $params = [
+            'index' => 'books',
+            'body' => [
+                'settings' => [
+                    'analysis' => [
+                        'analyzer' => [
+                            'my_stop_analyzer' => [
+                                'type' => 'stop', // Here we can define what kind of analyzer this is. Now it's a stop type (this is built in), but it could also be a custom one.
+                                'stopwords' => ['the', 'a', 'an', 'de', 'het', 'een'] // Our stop words we want to filter out.
+                            ],
+                        ]
+                    ],
+                ],
+                'mappings' => [
+                    'properties' => [
+                        'bunch_of_text' => [
+                            'type' => 'text',
+                            'analyzer' => 'my_stop_analyzer'
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+
+        try {
+            $this->elasticSearchClient->indices()->delete(['index' => 'books']);
+            $this->elasticSearchClient->indices()->create($params);
+        } catch (\Exception $e) {
+            dump($e);
+        }
+
+        $analyzingParams = [
+            'index' => 'books',
+            'body' => [
+                'analyzer' => 'my_stop_analyzer', // We defined this in our index 'books' so now we can use it for our analysis.
+                'text' => 'The rabbit jumped down the hole. A man noticed this and got confused. This is not Alice in wonderland.' // This is just random text. Does not relate to the property 'bunch_of_text'
+            ]
+        ];
+
+        // This will analyze the given text. It will not save anything. Purely for testing purposes.
+        $tokens = "";
+
+        foreach ($this->elasticSearchClient->indices()->analyze($analyzingParams)['tokens'] as $token) {
+            $tokens = $tokens . $token['token'] . ", ";
+        }
+
+        return $tokens;
+    }
 }
